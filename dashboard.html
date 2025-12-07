@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --blue-100: #e9f4ff;
+      --blue-200: #d7ecff;
+      --blue-500: #2b7ed6;
+      --blue-600: #1f6bb2;
+      --text-col: #243547;
+      --card-bg: #ffffff;
+    }
+
+    :root[data-bs-theme="dark"] {
+      --blue-100: #0d1b2a;
+      --blue-200: #1b263b;
+      --blue-500: #415a77;
+      --blue-600: #778da9;
+      --text-col: #e6ebf0;
+      --card-bg: #1b263b;
+    }
+
+    body {
+      font-family: Inter, sans-serif;
+      background: linear-gradient(180deg, var(--blue-100), var(--blue-200));
+      padding-top: 90px;
+      padding-bottom: 70px;
+      color: var(--text-col);
+    }
+
+    .navbar {
+      background: linear-gradient(90deg, var(--blue-500), var(--blue-600));
+    }
+
+    .navbar-brand,
+    .nav-link { color:white !important; }
+
+    .card-clean {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 25px;
+      box-shadow: 0px 8px 20px rgba(0,0,0,0.08);
+      margin-bottom: 30px;
+    }
+
+    /* Prevent stretching */
+    .chart-wrapper {
+      height: 350px;
+      position: relative;
+    }
+
+    footer {
+      background: linear-gradient(90deg, var(--blue-500), var(--blue-600));
+      color: white;
+      padding: 12px 0;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold"><i class="bi bi-speedometer2"></i> Dashboard</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="menu">
+      <ul class="navbar-nav ms-auto">
+
+        <!-- DARK MODE TOGGLE -->
+        <li class="nav-item me-2 d-flex align-items-center">
+          <button id="darkModeToggle" class="btn btn-outline-light btn-sm">
+            <i id="darkModeIcon" class="bi bi-moon-stars-fill"></i>
+          </button>
+        </li>
+
+        <li class="nav-item"><a class="nav-link" href="destination.html"><i class="bi bi-geo-alt-fill"></i> Destination</a></li>
+        <li class="nav-item"><a class="nav-link" href="user.html"><i class="bi bi-person"></i> User</a></li>
+        <li class="nav-item"><a class="nav-link active" href="dashboard.html"><i class="bi bi-speedometer"></i> Dashboard</a></li>
+
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+            <i class="bi bi-person-circle"></i> Profile
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item text-danger" href="login.html"><i class="bi bi-box-arrow-right"></i> Sign Out</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+<!-- CONTENT -->
+<div class="container">
+
+  <!-- SIDE-BY-SIDE CHART ROW  -->
+  <div class="row">
+    
+    <!-- Monthly Trips -->
+    <div class="col-lg-6">
+      <div class="card-clean">
+        <h4 class="fw-bold mb-3">Monthly Trips</h4>
+        <div class="chart-wrapper">
+          <canvas id="monthlyChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Spending Chart -->
+    <div class="col-lg-6">
+      <div class="card-clean">
+        <h4 class="fw-bold mb-3">Estimated vs Actual Spending</h4>
+        <div class="chart-wrapper">
+          <canvas id="spendingChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- END ROW -->
+
+  <!-- Balance Card -->
+  <div class="card-clean text-center">
+    <h4 class="fw-bold">Balance (RM)</h4>
+    <h2 class="fw-bold mt-2" id="balanceDisplay">0</h2>
+  </div>
+
+</div>
+
+<footer>© 2025 Travel Planner • All Rights Reserved</footer>
+
+<script>
+/* ---------------- DARK MODE (synced across pages) ---------------- */
+const toggleBtn = document.getElementById("darkModeToggle");
+const icon = document.getElementById("darkModeIcon");
+const htmlTag = document.documentElement;
+
+const savedTheme = localStorage.getItem("theme") || "light";
+htmlTag.setAttribute("data-bs-theme", savedTheme);
+if (savedTheme === "dark") {
+  icon.classList.replace("bi-moon-stars-fill", "bi-brightness-high-fill");
+}
+
+toggleBtn.addEventListener("click", () => {
+  const current = htmlTag.getAttribute("data-bs-theme");
+  const next = current === "light" ? "dark" : "light";
+
+  htmlTag.setAttribute("data-bs-theme", next);
+  localStorage.setItem("theme", next);
+
+  if (next === "dark") {
+    icon.classList.replace("bi-moon-stars-fill", "bi-brightness-high-fill");
+  } else {
+    icon.classList.replace("bi-brightness-high-fill", "bi-moon-stars-fill");
+  }
+});
+
+/* ---------------- LOAD DATA FROM LOCALSTORAGE ---------------- */
+let months = [
+  "January","February","March","April","May","June",
+  "July","August","September","October","November","December"
+];
+
+let monthlyTrips = JSON.parse(localStorage.getItem("monthlyTrips") || "[]");
+
+let est = Number(localStorage.getItem("user_estimated_spending") || 0);
+let actual = Number(localStorage.getItem("user_actual_spending") || 0);
+let balance = Number(localStorage.getItem("user_balance") || 0);
+
+document.getElementById("balanceDisplay").innerHTML = "RM " + balance.toFixed(2);
+
+
+/* ---------------- MONTHLY BAR CHART ---------------- */
+new Chart(document.getElementById("monthlyChart"), {
+  type: "bar",
+  data: {
+    labels: months,
+    datasets: [{
+      label: "Trips per Month",
+      data: monthlyTrips,
+      backgroundColor: "rgba(43,126,214,0.7)",
+      borderColor: "rgba(43,126,214,1)",
+      borderWidth: 1
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: { beginAtZero: true }
+    }
+  }
+});
+
+/* ---------------- SPENDING COMPARISON ---------------- */
+new Chart(document.getElementById("spendingChart"), {
+  type: "doughnut",
+  data: {
+    labels: ["Estimated Spending", "Actual Spending"],
+    datasets: [{
+      data: [est, actual],
+      backgroundColor: [
+        "rgba(31,107,178,0.8)",
+        "rgba(234,95,91,0.8)"
+      ]
+    }]
+  },
+  options: { 
+    responsive: true,
+    maintainAspectRatio: false
+  }
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <title>Trip</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+      <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root{
+            --blue-100: #e9f4ff;
+            --blue-200: #d7ecff;
+            --blue-500: #2b7ed6;
+            --blue-600: #1f6bb2;
+            --text-col: #243547;
+            --card-bg: #ffffff;
+            --muted: #6b7b8a;
+            --status-pending-bg: #fff5dd;
+            --status-pending-text: #9a7600;
+            --status-done-bg: #e3fae9;
+            --status-done-text: #1b7a59;
+        }
+
+        :root[data-bs-theme="dark"]{
+            --blue-100: #0d1b2a;
+            --blue-200: #1b263b;
+            --blue-500: #415a77;
+            --blue-600: #778da9;
+            --text-col: #e6ebf0;
+            --card-bg: #1b263b;
+            --muted: #b9c4d2;
+            --status-pending-bg: #4a3b13;
+            --status-pending-text: #ffdd88;
+            --status-done-bg: #123d27;
+            --status-done-text: #7ff5b5;
+        }
+
+        body { padding-top: 90px !important; }
+        .navbar { background: linear-gradient(90deg, var(--blue-500), var(--blue-600)) !important; }
+        .navbar-brand, .nav-link { color:white !important; }
+
+        footer {
+            background: linear-gradient(90deg, var(--blue-500), var(--blue-600));
+            color:white;
+            padding:12px 0;
+            text-align:center;
+            position:fixed;
+            bottom:0;
+            width:100%;
+            z-index:5;
+        }
+
+        body{
+            font-family:Inter, sans-serif;
+            background:linear-gradient(180deg,var(--blue-100),var(--blue-200));
+            padding-bottom:60px;
+            color:var(--text-col);
+            transition: background .3s ease, color .3s ease;
+        }
+
+        .card-clean{
+            background: var(--card-bg);
+            border-radius:12px;
+            border:none;
+            box-shadow:0 8px 20px rgba(0,0,0,0.08);
+            color:var(--text-col);
+        }
+
+        .btn-primary{
+            background:linear-gradient(90deg,var(--blue-500),var(--blue-600)); 
+            border:none;
+        }
+
+        .status-pending{
+            background:var(--status-pending-bg);
+            color:var(--status-pending-text);
+            padding:6px 10px;
+            border-radius:8px;
+            font-weight:600;
+        }
+
+        .status-done{
+            background:var(--status-done-bg);
+            color:var(--status-done-text);
+            padding:6px 10px;
+            border-radius:8px;
+            font-weight:600;
+        }
+
+        table, th, td { color: var(--text-col) !important; }
+    </style>
+</head>
+
+<body>
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold">
+            <i class="bi bi-compass-fill"></i> Travel Planner
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+
+                <!-- 🌙 Dark Mode Toggle moved to NAVBAR -->
+                <li class="nav-item me-2 d-flex align-items-center">
+                    <button id="darkModeToggle" class="btn btn-outline-light btn-sm">
+                        <i id="darkModeIcon" class="bi bi-moon-stars-fill"></i>
+                    </button>
+                </li>
+
+                <li class="nav-item"><a class="nav-link" href="destination.html"><i class="bi bi-geo-alt-fill"></i> Destination</a></li>
+                <li class="nav-item"><a class="nav-link" href="user.html"><i class="bi bi-person"></i> User</a></li>
+                <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle"></i> Profile
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="login.html"><i class="bi bi-box-arrow-right"></i> Sign Out</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+
+    <!-- header now only has the trip title -->
+    <div class="d-flex justify-content-between mb-3">
+        <h2 id="tripTitle"></h2>
+    </div>
+
+    <div class="card-clean p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h4 class="fw-bold">Trip Overview</h4>
+                <p class="text-secondary" id="tripDetails"></p>
+            </div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#activityModal">
+                + Add Activity
+            </button>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end mb-3 gap-2">
+        <select id="sortBy" class="form-select w-auto">
+            <option value="day">Sort: Day (A→Z)</option>
+            <option value="cost-asc">Cost (Low→High)</option>
+            <option value="cost-desc">Cost (High→Low)</option>
+        </select>
+
+        <select id="filterStatus" class="form-select w-auto">
+            <option value="All">Status: All</option>
+            <option value="Pending">Pending</option>
+            <option value="Done">Done</option>
+        </select>
+    </div>
+
+    <div class="card-clean p-4">
+        <h4 class="mb-3">Activities</h4>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Day</th>
+                        <th>Activity</th>
+                        <th>Time</th>
+                        <th>Location</th>
+                        <th>Cost (RM)</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="activitiesTbody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<footer>
+    © 2025 Travel Planner • All Rights Reserved
+</footer>
+
+<!-- MODAL -->
+<div class="modal fade" id="activityModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form id="activityForm" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Add Activity</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="editIndex" value="-1">
+
+                <label class="form-label">Day</label>
+                <select id="dayInput" class="form-select mb-2">
+                    <option>Day 1</option>
+                    <option>Day 2</option>
+                    <option>Day 3</option>
+                    <option>Day 4</option>
+                    <option>Day 5</option>
+                </select>
+
+                <label class="form-label">Activity</label>
+                <input id="nameInput" class="form-control mb-2" required>
+
+                <label class="form-label">Time</label>
+                <input id="timeInput" class="form-control mb-2" required>
+
+                <label class="form-label">Location</label>
+                <input id="locInput" class="form-control mb-2">
+
+                <label class="form-label">Cost (RM)</label>
+                <input id="costInput" type="number" class="form-control mb-2" value="0">
+
+                <label class="form-label">Status</label>
+                <select id="statusInput" class="form-select mb-2">
+                    <option value="Pending">Pending</option>
+                    <option value="Done">Done</option>
+                </select>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" type="submit">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+/* ---------- DARK MODE ---------- */
+const darkModeToggle = document.getElementById('darkModeToggle');
+const darkModeIcon = document.getElementById('darkModeIcon');
+const htmlElement = document.documentElement;
+const currentTheme = localStorage.getItem('theme') || 'light';
+
+htmlElement.setAttribute('data-bs-theme', currentTheme);
+updateIcon(currentTheme);
+
+darkModeToggle.addEventListener('click', () => {
+    const currentTheme = htmlElement.getAttribute('data-bs-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    htmlElement.setAttribute('data-bs-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateIcon(newTheme);
+});
+
+function updateIcon(theme){
+    darkModeIcon.className = theme === "dark" ? "bi bi-sun-fill" : "bi bi-moon-stars-fill";
+}
+
+/* ---------- TRIP INFO ---------- */
+const params = new URLSearchParams(window.location.search);
+const destination = params.get("destination") || "Unknown";
+const tripStart = params.get("start") || "-";
+const tripEnd = params.get("end") || "-";
+const tripBudget = Number(params.get("budget") || "0");
+
+document.getElementById("tripTitle").innerText = destination + " Trip";
+document.getElementById("tripDetails").innerText =
+    `Destination: ${destination} • ${tripStart} → ${tripEnd} • Budget: RM${tripBudget}`;
+
+const STORAGE_KEY = "trip_activities_" + destination.replace(/\s+/g,"_");
+let activities = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+
+
+/* ---------- DEFAULT ACTIVITIES---------- */
+const defaultActivitiesDB = {
+    "Bali": [
+        { day:"Day 1", name:"Beach Walk & Sunset", time:"5:00 PM", location:"Kuta Beach", cost:250, status:"Pending" },
+        { day:"Day 2", name:"Temple Visit & Entry", time:"10:00 AM", location:"Uluwatu Temple", cost:180, status:"Pending" },
+        { day:"Day 3", name:"Local Food & Transport", time:"1:00 PM", location:"Various Warungs", cost:350, status:"Pending" }
+    ],
+    "Tokyo": [
+        { day:"Day 1", name:"City Walking + Metro", time:"10:00 AM", location:"Shinjuku", cost:450, status:"Pending" },
+        { day:"Day 2", name:"Museum/Attraction Tickets", time:"2:00 PM", location:"Akihabara / Museums", cost:1300, status:"Pending" },
+        { day:"Day 3", name:"Meals & Shopping", time:"11:00 AM", location:"Local Stores", cost:900, status:"Pending" }
+    ],
+    "Da Nang": [
+        { day:"Day 1", name:"Dragon Bridge & Walk", time:"8:00 PM", location:"City Center", cost:150, status:"Pending" },
+        { day:"Day 2", name:"Beach + Snacks", time:"10:00 AM", location:"My Khe Beach", cost:120, status:"Pending" },
+        { day:"Day 3", name:"Local Market Food", time:"1:00 PM", location:"Han Market", cost:220, status:"Pending" }
+    ],
+    "Sydney": [
+        { day:"Day 1", name:"Harbour Walk & Ferry", time:"10:00 AM", location:"Circular Quay", cost:650, status:"Pending" },
+        { day:"Day 2", name:"Opera House Tour & Tickets", time:"11:00 AM", location:"Sydney Opera House", cost:2100, status:"Pending" },
+        { day:"Day 3", name:"Beach & Cafes", time:"2:00 PM", location:"Bondi", cost:900, status:"Pending" }
+    ],
+    "Osaka": [
+        { day:"Day 1", name:"Dotonbori Walk & Food", time:"7:00 PM", location:"Dotonbori", cost:500, status:"Pending" },
+        { day:"Day 2", name:"Castle Entrance & Transport", time:"10:00 AM", location:"Osaka Castle", cost:420, status:"Pending" },
+        { day:"Day 3", name:"Street Food Tour", time:"6:00 PM", location:"Shinsekai", cost:750, status:"Pending" }
+    ],
+    "Mecca": [
+        { day:"Day 1", name:"Rest & Preparation", time:"2:00 PM", location:"Hotel", cost:200, status:"Pending" },
+        { day:"Day 2", name:"Masjid Al Haram Visit (local costs)", time:"8:00 AM", location:"Haram Area", cost:150, status:"Pending" },
+        { day:"Day 3", name:"Local Market & Meals", time:"4:00 PM", location:"Nearby Market", cost:450, status:"Pending" }
+    ],
+    "Cebu": [
+        { day:"Day 1", name:"Beach Relaxation", time:"10:00 AM", location:"Mactan", cost:200, status:"Pending" },
+        { day:"Day 2", name:"Snorkeling Trip (tour)", time:"9:00 AM", location:"Island Tour", cost:600, status:"Pending" },
+        { day:"Day 3", name:"Seafood Dinner", time:"7:00 PM", location:"Seaside", cost:250, status:"Pending" }
+    ],
+    "Hokkaido": [
+        { day:"Day 1", name:"Snow Walk & Local Transit", time:"11:00 AM", location:"Sapporo", cost:400, status:"Pending" },
+        { day:"Day 2", name:"Seafood Market Meals", time:"9:00 AM", location:"Nijo Market", cost:600, status:"Pending" },
+        { day:"Day 3", name:"Onsen Entry & Relax", time:"6:00 PM", location:"Local Onsen", cost:1200, status:"Pending" }
+    ],
+    "Jakarta": [
+        { day:"Day 1", name:"Mall & Food", time:"2:00 PM", location:"Grand Indonesia", cost:150, status:"Pending" },
+        { day:"Day 2", name:"Historical Museum Entry", time:"11:00 AM", location:"Kota Tua", cost:80, status:"Pending" },
+        { day:"Day 3", name:"Street Snacks & Transport", time:"7:00 PM", location:"Local Market", cost:120, status:"Pending" }
+    ],
+    "Sapporo": [
+        { day:"Day 1", name:"Snow Festival Area Walk", time:"3:00 PM", location:"Odori Park", cost:350, status:"Pending" },
+        { day:"Day 2", name:"Ramen Meals & Sampling", time:"1:00 PM", location:"Ramen Alley", cost:450, status:"Pending" },
+        { day:"Day 3", name:"City Walk & Local Transit", time:"11:00 AM", location:"Susukino", cost:250, status:"Pending" }
+    ],
+    "Hanoi": [
+        { day:"Day 1", name:"Old Quarter Walk", time:"4:00 PM", location:"Old Quarter", cost:100, status:"Pending" },
+        { day:"Day 2", name:"Street Food Tour", time:"12:00 PM", location:"Hanoi Center", cost:180, status:"Pending" },
+        { day:"Day 3", name:"Temple Visit & Entry", time:"10:00 AM", location:"Temple of Literature", cost:90, status:"Pending" }
+    ]
+};
+
+
+/* ----- AUTO-INJECT DEFAULTS IF EMPTY ----- */
+if (activities.length === 0 && defaultActivitiesDB[destination]) {
+    const defaults = defaultActivitiesDB[destination];
+
+    // ensure total actual spending < estimated budget
+    let totalCost = defaults.reduce((sum, a) => sum + a.cost, 0);
+    if (totalCost <= tripBudget) {
+        activities = defaults;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
+    } else {
+        // If totals somehow exceed budget, scale them down proportionally (safeguard)
+        const scale = tripBudget / (totalCost + 1); // +1 to avoid div0
+        activities = defaults.map(a => ({...a, cost: Math.max(0, Math.round(a.cost * scale * 0.95))})); // keep slightly under
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
+    }
+}
+
+/* ---------- RENDER ---------- */
+function render(){
+    const sortByVal = sortBy.value;
+    const filter = filterStatus.value;
+    let list = [...activities];
+
+    if(sortByVal === "day"){
+        list.sort((a,b)=> parseInt(a.day.replace("Day ","")) - parseInt(b.day.replace("Day ","")));
+    }
+    else if(sortByVal === "cost-asc"){
+        list.sort((a,b)=> a.cost - b.cost);
+    }
+    else if(sortByVal === "cost-desc"){
+        list.sort((a,b)=> b.cost - a.cost);
+    }
+
+    if(filter !== "All"){
+        list = list.filter(x=> x.status === filter);
+    }
+
+    activitiesTbody.innerHTML = "";
+    list.forEach(act=>{
+        const realIndex = activities.indexOf(act);
+        const badge = act.status === "Done"
+            ? `<span class='status-done'>Done</span>`
+            : `<span class='status-pending'>Pending</span>`;
+
+        activitiesTbody.innerHTML += `
+        <tr>
+            <td>${act.day}</td>
+            <td>${act.name}</td>
+            <td>${act.time}</td>
+            <td>${act.location || "-"}</td>
+            <td>${act.cost}</td>
+            <td>${badge}</td>
+            <td class="text-end">
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="editActivity(${realIndex})">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteActivity(${realIndex})">Delete</button>
+            </td>
+        </tr>`;
+    });
+}
+
+/* ---------- ADD / EDIT ---------- */
+activityForm.addEventListener("submit", function(e){
+    e.preventDefault();
+
+    const idx = parseInt(editIndex.value);
+
+    const newAct = {
+        day: dayInput.value,
+        name: nameInput.value,
+        time: timeInput.value,
+        location: locInput.value,
+        cost: Number(costInput.value || 0),
+        status: statusInput.value
+    };
+
+    if(idx >= 0){
+        activities[idx] = newAct;
+    } else {
+        activities.push(newAct);
+    }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
+
+    bootstrap.Modal.getInstance(activityModal).hide();
+    this.reset();
+    editIndex.value = -1;
+    render();
+});
+
+function editActivity(i){
+    const x = activities[i];
+    editIndex.value = i;
+    dayInput.value = x.day;
+    nameInput.value = x.name;
+    timeInput.value = x.time;
+    locInput.value = x.location;
+    costInput.value = x.cost;
+    statusInput.value = x.status;
+
+    modalTitle.innerText = "Edit Activity";
+    new bootstrap.Modal(activityModal).show();
+}
+
+function deleteActivity(i){
+    if(confirm("Delete this activity?")){
+        activities.splice(i,1);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
+        render();
+    }
+}
+
+activityModal.addEventListener("hidden.bs.modal", ()=>{
+    modalTitle.innerText = "Add Activity";
+    activityForm.reset();
+    editIndex.value = -1;
+});
+
+render();
+</script>
+</body>
+</html>

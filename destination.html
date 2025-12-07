@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en" data-bs-theme="light">
+
+<head>
+  <meta charset="utf-8">
+  <title>Destinations</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --blue-100: #d8ecff;
+      --blue-200: #cfe7ff;
+      --blue-500: #2b7ed6;
+      --blue-600: #1f6bb2;
+      --text-light: #26435f;
+    }
+
+    :root[data-bs-theme="dark"] {
+      --blue-100: #0d1b2a;
+      --blue-200: #1b263b;
+      --blue-500: #415a77;
+      --blue-600: #778da9;
+      --text-light: #e0e6ed;
+    }
+
+    body {
+      background: var(--blue-100);
+      color: var(--text-light);
+      font-family: Inter, sans-serif;
+      padding-top: 80px;
+      padding-bottom: 60px;
+      transition: background .3s ease, color .3s ease;
+    }
+
+    .navbar {
+      background: linear-gradient(90deg, var(--blue-500), var(--blue-600)) !important;
+    }
+
+    .navbar-brand,
+    .nav-link {
+      color: white !important;
+    }
+
+    footer {
+      background: linear-gradient(90deg, var(--blue-500), var(--blue-600));
+      color: white;
+      padding: 12px 0;
+      text-align: center;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      z-index: 5;
+    }
+
+    .card-clean,
+    .destination-card {
+      background: var(--blue-200);
+      color: var(--text-light);
+      border-radius: 14px;
+      border: none;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+    }
+
+    .destination-card {
+      overflow: hidden;
+      transition: .18s;
+      cursor: pointer;
+    }
+
+    .destination-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .destination-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, var(--blue-500), var(--blue-600));
+      border: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container-fluid">
+
+      <a class="navbar-brand fw-bold">
+        <i class="bi bi-compass-fill"></i> Travel Planner
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navMenu">
+
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+
+          <!-- 🌙 Dark Mode Toggle -->
+          <li class="nav-item me-2 d-flex align-items-center">
+            <button id="darkModeToggle" class="btn btn-outline-light btn-sm">
+              <i id="darkModeIcon" class="bi bi-moon-stars-fill"></i>
+            </button>
+          </li>
+
+          <li class="nav-item"><a class="nav-link" href="destination.html"><i class="bi bi-geo-alt-fill"></i>
+              Destination</a></li>
+          <li class="nav-item"><a class="nav-link" href="user.html"><i class="bi bi-person"></i> User</a></li>
+          <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="bi bi-speedometer2"></i>
+              Dashboard</a></li>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle"></i> Profile
+            </a>
+
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li><a class="dropdown-item text-danger" href="login.html"><i class="bi bi-box-arrow-right"></i> Sign
+                  Out</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTENT -->
+  <div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="fw-bold">Destinations</h2>
+        <p class="text-secondary mb-0">Click a card to open the trip page</p>
+      </div>
+
+      <div class="d-flex gap-2 align-items-center">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#destModal">
+          + Add Destination
+        </button>
+      </div>
+    </div>
+
+    <div class="card-clean p-3 mb-4">
+      <div class="d-flex gap-2">
+        <input id="searchInput" class="form-control" placeholder="Search destination...">
+        <button class="btn btn-outline-primary" onclick="searchDest()">Search</button>
+        <button class="btn btn-outline-secondary" onclick="resetSearch()">Reset</button>
+      </div>
+    </div>
+
+    <div class="row g-3" id="destGrid"></div>
+
+  </div>
+
+  <footer>
+    © 2025 Travel Planner • All Rights Reserved
+  </footer>
+
+  <!-- MODAL -->
+  <div class="modal fade" id="destModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content p-3">
+        <h5 id="modalTitle" class="fw-bold">Add Destination</h5>
+
+        <input id="destName" class="form-control my-2" placeholder="Destination Name">
+        <input id="destCountry" class="form-control my-2" placeholder="Country">
+        <input id="destImg" class="form-control my-2" placeholder="Image URL">
+        <textarea id="destDesc" class="form-control my-2" placeholder="Description"></textarea>
+        <input id="destStart" type="date" class="form-control my-2">
+        <input id="destEnd" type="date" class="form-control my-2">
+        <input id="destBudget" type="number" class="form-control my-2" placeholder="Budget">
+
+        <input type="hidden" id="editIndex" value="-1">
+
+        <button class="btn btn-primary w-100" onclick="saveForm()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // ---------- DARK MODE (synced across pages) ----------
+    const toggleBtn = document.getElementById("darkModeToggle");
+    const icon = document.getElementById("darkModeIcon");
+    const htmlTag = document.documentElement;
+
+    const savedTheme = localStorage.getItem("theme") || "light";
+    htmlTag.setAttribute("data-bs-theme", savedTheme);
+    if (savedTheme === "dark") {
+      icon.classList.replace("bi-moon-stars-fill", "bi-brightness-high-fill");
+    }
+
+    toggleBtn.addEventListener("click", () => {
+      const current = htmlTag.getAttribute("data-bs-theme");
+      const next = current === "light" ? "dark" : "light";
+
+      htmlTag.setAttribute("data-bs-theme", next);
+      localStorage.setItem("theme", next);
+
+      if (next === "dark") {
+        icon.classList.replace("bi-moon-stars-fill", "bi-brightness-high-fill");
+      } else {
+        icon.classList.replace("bi-brightness-high-fill", "bi-moon-stars-fill");
+      }
+    });
+
+    /* LOAD FROM LOCAL STORAGE OR DEFAULT DATA */
+    let destinations = JSON.parse(localStorage.getItem("destinations")) || [
+      // January
+      {
+        name: "Bali",
+        country: "Indonesia",
+        img: "https://cdn.audleytravel.com/2478/1770/79/16027396-pura-ulun-danu-bratan-bali.jpg",
+        desc: "Beautiful beaches, temples and sunsets.",
+        start: "2025-01-12",
+        end: "2025-01-15",
+        budget: 800
+      },
+      {
+        name: "Tokyo",
+        country: "Japan",
+        img: "https://i0.wp.com/www.touristjapan.com/wp-content/uploads/2025/02/map-of-tokyo-japan-shinjuku-scaled.jpg",
+        desc: "City of technology, anime and culture.",
+        start: "2025-01-20",
+        end: "2025-01-25",
+        budget: 1800
+      },
+
+      // February
+      {
+        name: "Da Nang",
+        country: "Vietnam",
+        img: "https://cdn.sanity.io/images/nxpteyfv/goguides/f88dee8247158158f100630b54e562abac3da343-1600x1066.jpg",
+        desc: "Modern city with beaches, food and nightlife.",
+        start: "2025-02-01",
+        end: "2025-02-04",
+        budget: 800
+      },
+      {
+        name: "Sydney",
+        country: "Australia",
+        img: "https://a.travel-assets.com/findyours-php/viewfinder/images/res70/474000/474916-Sydney-Opera-House.jpg?impolicy=fcrop&w=1040&h=580&q=mediumHigh",
+        desc: "Harbour city with iconic Opera House.",
+        start: "2025-02-10",
+        end: "2025-02-15",
+        budget: 10000
+      },
+      {
+        name: "Osaka",
+        country: "Japan",
+        img: "https://photos.smugmug.com/Osaka/Osaka-Travel-Guide/i-4mhQ4s9/0/L/must-see-osaka-1-day-itinerary-osaka-dotombori-canal-L.jpg",
+        desc: "Famous for street food and theme parks.",
+        start: "2025-02-20",
+        end: "2025-02-24",
+        budget: 1500
+      },
+
+      // April
+      {
+        name: "Mecca",
+        country: "Saudi Arabia",
+        img: "https://sacredsites.com/images/middle_east/saudi_arabia/Mecca-Great-Mosque_H_01.webp",
+        desc: "Sacred holy city for Muslim pilgrimage.",
+        start: "2025-04-05",
+        end: "2025-04-12",
+        budget: 6000
+      },
+      {
+        name: "Sydney",
+        country: "Australia",
+        img: "https://a.travel-assets.com/findyours-php/viewfinder/images/res70/474000/474916-Sydney-Opera-House.jpg?impolicy=fcrop&w=1040&h=580&q=mediumHigh",
+        desc: "Harbour city with iconic Opera House.",
+        start: "2025-04-20",
+        end: "2025-04-25",
+        budget: 2000
+      },
+
+      // June
+      {
+        name: "Cebu",
+        country: "Philippines",
+        img: "https://a.travel-assets.com/findyours-php/viewfinder/images/res70/129000/129055-Cebu-Island.jpg",
+        desc: "Stunning natural beauty and marine adventures.",
+        start: "2025-06-10",
+        end: "2025-06-14",
+        budget: 1000
+      },
+
+      // August
+      {
+        name: "Hokkaido",
+        country: "Japan",
+        img: "https://www.todofuken.net/wp-content/uploads/Hokkaido-768x327.jpg",
+        desc: "Snow resorts, seafood and nature.",
+        start: "2025-08-15",
+        end: "2025-08-20",
+        budget: 2000
+      },
+
+      // October
+      {
+        name: "Jakarta",
+        country: "Indonesia",
+        img: "https://www.globalgovernmentforum.com/wp-content/uploads/2019/09/Jakarta_Rizky-Maharani_Wikimedia-Commons-620x414.jpg",
+        desc: "Capital city with markets and cultural sites.",
+        start: "2025-10-05",
+        end: "2025-10-08",
+        budget: 800
+      },
+      {
+        name: "Mecca",
+        country: "Saudi Arabia",
+        img: "https://sacredsites.com/images/middle_east/saudi_arabia/Mecca-Great-Mosque_H_01.webp",
+        desc: "Sacred holy city for Muslim pilgrimage.",
+        start: "2025-10-20",
+        end: "2025-10-27",
+        budget: 5000
+      },
+
+      // December
+      {
+        name: "Sapporo",
+        country: "Japan",
+        img: "https://a.travel-assets.com/findyours-php/viewfinder/images/res70/457000/457968-Hokkaido.jpg",
+        desc: "Snow festival and delicious ramen.",
+        start: "2025-12-01",
+        end: "2025-12-05",
+        budget: 3000
+      },
+      {
+        name: "Hanoi",
+        country: "Vietnam",
+        img: "https://images.contentstack.io/v3/assets/blt06f605a34f1194ff/bltfe6ccc9f52ef7ff4/67554f1f2267721bc050165d/iStock-2153200158-HEADER.jpg",
+        desc: "Historic city with street food and culture.",
+        start: "2025-12-10",
+        end: "2025-12-14",
+        budget: 1000
+      }
+    ];
+
+    // First-time load: persist default destinations so other pages can read them
+    if (!localStorage.getItem("destinations")) {
+      localStorage.setItem("destinations", JSON.stringify(destinations));
+    }
+
+    function saveDestinations() {
+      localStorage.setItem("destinations", JSON.stringify(destinations));
+    }
+
+    /* RENDER GRID */
+    function renderGrid(list = destinations) {
+      const grid = document.getElementById("destGrid");
+      grid.innerHTML = "";
+
+      list.forEach((dest, i) => {
+        grid.innerHTML += `
+      <div class="col-md-4">
+        <div class="destination-card"
+             onclick="window.location.href='trips.html?destination=${encodeURIComponent(dest.name)}&start=${dest.start}&end=${dest.end}&budget=${dest.budget}'">
+
+          <img src="${dest.img}" alt="${escapeHtml(dest.name)}"
+               onerror="this.src='https://via.placeholder.com/600x350?text=No+Image'">
+
+          <div class="p-3">
+            <h5 class="fw-bold mb-1">${escapeHtml(dest.name)}</h5>
+            <p class="text-secondary mb-1">${escapeHtml(dest.country)}</p>
+            <p class="mb-3" style="font-size:.95rem;">
+              ${escapeHtml(dest.desc || "")}
+            </p>
+
+            <div class="d-flex justify-content-end gap-2">
+              <button class="btn btn-sm btn-outline-primary"
+                onclick="event.stopPropagation(); editDest(${i})">Edit</button>
+              <button class="btn btn-sm btn-danger"
+                onclick="event.stopPropagation(); deleteDest(${i})">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+      });
+    }
+    renderGrid();
+
+    function escapeHtml(s) {
+      if (!s) return "";
+      return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    /* SEARCH */
+    function searchDest() {
+      const txt = searchInput.value.trim().toLowerCase();
+      if (!txt) { renderGrid(); return; }
+
+      renderGrid(destinations.filter(d =>
+        d.name.toLowerCase().includes(txt) ||
+        d.country.toLowerCase().includes(txt) ||
+        (d.desc || "").toLowerCase().includes(txt)
+      ));
+    }
+    function resetSearch() {
+      searchInput.value = "";
+      renderGrid();
+    }
+
+    /* SAVE FORM */
+    function saveForm() {
+      const index = Number(editIndex.value);
+
+      const data = {
+        name: destName.value.trim(),
+        country: destCountry.value.trim(),
+        img: destImg.value.trim() || "https://via.placeholder.com/600x350?text=Destination",
+        desc: destDesc.value.trim(),
+        start: destStart.value,
+        end: destEnd.value,
+        budget: destBudget.value
+      };
+
+      if (index >= 0) {
+        destinations[index] = data;
+      } else {
+        destinations.push(data);
+      }
+
+      saveDestinations();
+      bootstrap.Modal.getInstance(destModal).hide();
+
+      editIndex.value = -1;
+      modalTitle.innerText = "Add Destination";
+      renderGrid();
+    }
+
+    /* EDIT */
+    function editDest(i) {
+      const d = destinations[i];
+
+      destName.value = d.name;
+      destCountry.value = d.country;
+      destImg.value = d.img;
+      destDesc.value = d.desc;
+      destStart.value = d.start || "";
+      destEnd.value = d.end || "";
+      destBudget.value = d.budget || "";
+
+      editIndex.value = i;
+      modalTitle.innerText = "Edit Destination";
+
+      new bootstrap.Modal(destModal).show();
+    }
+
+    /* DELETE */
+    function deleteDest(i) {
+      if (confirm("Delete this destination?")) {
+        destinations.splice(i, 1);
+        saveDestinations();
+        renderGrid();
+      }
+    }
+  </script>
+
+</body>
+
+</html>
